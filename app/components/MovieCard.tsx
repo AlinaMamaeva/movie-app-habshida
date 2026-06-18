@@ -4,7 +4,10 @@ import { Movie } from "@/app/types/movie";
 import { Card, Tag, Rate } from "antd";
 import Image from "next/image";
 
-const MovieCard = ({ movie }: { movie: Movie }) => {
+interface Props {
+  movie: Movie;
+}
+const MovieCard = ({ movie }: Props) => {
   const imageUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : "/no-image.png";

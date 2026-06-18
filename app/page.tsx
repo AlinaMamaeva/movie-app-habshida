@@ -3,11 +3,14 @@ import MovieCard from "./components/MovieCard";
 import { Input, Tabs } from "antd";
 import PaginationClient from "./components/PaginationClient";
 
-const HomePage = async ({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string }>;
-}) => {
+interface SearchParams {
+  page?: string; // ? string || undefined,   ?без поле должно быть всегда
+}
+
+interface HomePageProps {
+  searchParams: Promise<SearchParams>; // <-- стал promise из за await ->  const { page: pageParam } = await searchParams;
+}
+const HomePage = async ({ searchParams }: HomePageProps) => {
   const { page: pageParam } = await searchParams;
   const page = Number(pageParam) || 1;
 
