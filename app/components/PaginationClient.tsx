@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 interface Props {
   currentPage: number;
   total: number;
+  className?: string;
 }
 
 export default function PaginationClient({ currentPage, total }: Props) {
