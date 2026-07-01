@@ -1,7 +1,7 @@
 "use client";
 import { format } from "date-fns";
 
-import { Movie, Genre } from "@/app/types/movie";
+import { Movie, Genre } from "@/src/types/movie";
 import { Card, Tag, Rate } from "antd";
 import Image from "next/image";
 import styles from "./MovieCard.module.css";
@@ -17,6 +17,49 @@ const MovieCard = ({ movie, genres }: Props) => {
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : "/no-image.png";
   const [expanded, setExpanded] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+
+  const getRatingColor = (rating: number): string => {
+    if (rating <= 3) return "#E90000";
+    if (rating <= 5) return "#E97E00";
+    if (rating <= 7) return " #E9D100";
+    return "#66E900";
+  };
+
+  const rateMovie = async (movieId: number, rating: number) => {
+    const guestSessionId = localStorage.getItem("guestSessionId");
+
+    console.log("GS", guestSessionId);
+    console.log("API KEY", process.env.NEXT_PUBLIC_TMDB_API_KEY);
+
+    if (!guestSessionId) {
+      console.error("No session");
+      return;
+    }
+    try {
+      const res = await fetch(
+        "/api/rate",
+
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ movieId, rating, guestSessionId }),
+        },
+      );
+
+      if (!res.ok) {
+        console.error(`Failed to rate movie: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("aswer TMDB", data);
+
+      setUserRating(rating);
+    } catch (error) {
+      console.error("Fetch err", error);
+    }
+  };
+
   return (
     <Card className={styles.movieCard}>
       <div className={styles.inner}>
@@ -34,7 +77,12 @@ const MovieCard = ({ movie, genres }: Props) => {
               <div className={styles.header}>
                 <h2 className={styles.title}>{movie.title}</h2>
 
-                <div className={styles.rating}>
+                <div
+                  className={styles.rating}
+                  style={{
+                    border: `2px solid ${getRatingColor(movie.vote_average)}`,
+                  }}
+                >
                   {movie.vote_average.toFixed(1)}
                 </div>
               </div>
@@ -65,10 +113,10 @@ const MovieCard = ({ movie, genres }: Props) => {
 
               <Rate
                 className={styles.rate}
-                disabled
                 count={10}
                 allowHalf
-                defaultValue={movie.vote_average}
+                value={userRating}
+                onChange={(value) => rateMovie(movie.id, value)}
               />
             </div>
           </div>

@@ -1,9 +1,9 @@
-import { Movie, Genre } from "./types/movie";
-import MovieCard from "./components/MovieCard";
-import { Alert, Button, Tabs } from "antd";
-import PaginationClient from "./components/PaginationClient";
-import SearchClient from "./components/SearchClient";
+import { Movie, Genre } from "@/src/types/movie";
+import { Alert, Button } from "antd";
 import Link from "next/link";
+import GuestSession from "../components/GuestSession/GuestSession";
+import TabsClient from "../components/TabsClient";
+import { fetchMovies, fetchGenres } from "../lib/api";
 
 interface HomePageProps {
   searchParams: Promise<{ page?: string; query?: string }>; // <-- стал promise из за await ->  const { page: pageParam } = await searchParams;
@@ -18,20 +18,16 @@ const HomePage = async ({ searchParams }: HomePageProps) => {
   let total = 0;
 
   try {
-    // await new Promise((resolve) => setTimeout(resolve, 6000));
+    // из lib api.ts
     const [moviesRes, genresRes] = await Promise.all([
-      fetch(
-        `https://api.themoviedb.org/3/search/movie?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&query=${query}&page=${page}`,
-        { cache: "no-store" },
-      ),
-      fetch(
-        `https://api.themoviedb.org/3/genre/movie/list?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`,
-        { cache: "no-store" },
-      ),
+      fetchMovies(query, page),
+      fetchGenres(),
     ]);
 
     if (!moviesRes.ok)
       throw new Error(`Failed to fetch movies: ${moviesRes.status}`);
+    if (!genresRes.ok)
+      throw new Error(`Failed to fetch movie: ${genresRes.status}`);
 
     const data = await moviesRes.json();
     const genresData = await genresRes.json();
@@ -39,8 +35,9 @@ const HomePage = async ({ searchParams }: HomePageProps) => {
     movies = data.results.slice(0, 6) ?? [];
     genres = genresData.genres;
     total = data.total_results;
-  } catch {
-    throw new Error("No Internet Connection");
+  } catch (error) {
+    console.error("Failed to fetch data:", error);
+    console.log("No Internet Connection");
   }
 
   if (movies.length === 0) {
@@ -67,21 +64,8 @@ const HomePage = async ({ searchParams }: HomePageProps) => {
 
   return (
     <main className="main">
-      <Tabs
-        items={[
-          { key: "search", label: "Search" },
-          { key: "rated", label: "Rated" },
-        ]}
-        className="tabs"
-      />
-
-      <SearchClient />
-      <div className="movie-grid">
-        {movies.map((movie) => (
-          <MovieCard key={movie.id} movie={movie} genres={genres} />
-        ))}
-      </div>
-      <PaginationClient currentPage={page} total={total} />
+      <GuestSession />
+      <TabsClient movies={movies} genres={genres} page={page} total={total} />
     </main>
   );
 };
