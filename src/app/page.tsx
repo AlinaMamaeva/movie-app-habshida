@@ -10,8 +10,8 @@ interface HomePageProps {
 }
 
 const HomePage = async ({ searchParams }: HomePageProps) => {
-  const { page: pageParam, query = "return" } = await searchParams;
-  const page = Number(pageParam) || 1;
+  const { page: pageParam, query = "" } = await searchParams;
+  const page = Math.min(Number(pageParam) || 1, 500);
 
   let movies: Movie[] = [];
   let genres: Genre[] = [];
@@ -34,7 +34,7 @@ const HomePage = async ({ searchParams }: HomePageProps) => {
 
     movies = data.results.slice(0, 6) ?? [];
     genres = genresData.genres;
-    total = data.total_results;
+    total = Math.min(data.total_results, 500 * 6);
   } catch (error) {
     console.error("Failed to fetch data:", error);
     console.log("No Internet Connection");

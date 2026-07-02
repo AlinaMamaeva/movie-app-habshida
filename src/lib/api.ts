@@ -5,11 +5,12 @@ if (!API_KEY) throw new Error("TMDB API key is not defined");
 
 //fetch
 
-export const fetchMovies = (query: string, page: number) =>
-  fetch(
-    `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}&page=${page}`,
-    { cache: "no-cache" },
-  );
+export const fetchMovies = (query: string, page: number) => {
+  const url = query
+    ? `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}&page=${page}`
+    : `${BASE_URL}/movie/popular?api_key=${API_KEY}&page=${page}`;
+  return fetch(url, { cache: "no-cache" });
+};
 
 export const fetchGenres = () =>
   fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}`, {

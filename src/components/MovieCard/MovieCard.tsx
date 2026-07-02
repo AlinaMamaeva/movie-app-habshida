@@ -6,6 +6,7 @@ import { Card, Tag, Rate } from "antd";
 import Image from "next/image";
 import styles from "./MovieCard.module.css";
 import { useState } from "react";
+import { truncate } from "@/src/lib/truncate";
 
 interface Props {
   movie: Movie;
@@ -104,12 +105,13 @@ const MovieCard = ({ movie, genres }: Props) => {
             </div>
 
             <div className={styles.star}>
-              <div
-                className={`${styles.textWrapper} ${expanded ? styles.expanded : ""}`}
+              <p
+                className={styles.mainText}
                 onClick={() => setExpanded((p) => !p)}
+                style={{ cursor: "pointer" }}
               >
-                <p className={styles.mainText}>{movie.overview}</p>
-              </div>
+                {expanded ? movie.overview : truncate(movie.overview, 150)}
+              </p>
 
               <Rate
                 className={styles.rate}

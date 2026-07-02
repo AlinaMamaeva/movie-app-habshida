@@ -1,7 +1,7 @@
 "use client";
 
 import { Pagination } from "antd";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface Props {
   currentPage: number;
@@ -11,13 +11,18 @@ interface Props {
 
 export default function PaginationClient({ currentPage, total }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   return (
     <Pagination
       current={currentPage}
       total={total}
       pageSize={6}
-      onChange={(page) => router.push(`?page=${page}`)}
+      onChange={(page) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("page", String(page));
+        router.push(`?${params.toString()}`);
+      }}
       showSizeChanger={false}
       className="pagination"
     />
