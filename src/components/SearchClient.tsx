@@ -1,13 +1,20 @@
 "use client";
 import { Input } from "antd";
 import { useRouter, usePathname } from "next/navigation";
+
 import { useDebouncedCallback } from "use-debounce";
 
-export default function SearchClient() {
+interface Props {
+  onSearch?: () => void;
+}
+
+export default function SearchClient({ onSearch }: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
   const handleSearch = useDebouncedCallback((value: string) => {
+    onSearch?.();
+
     if (!value) {
       router.push(pathname);
       return;

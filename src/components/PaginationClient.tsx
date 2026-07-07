@@ -17,7 +17,7 @@ export default function PaginationClient({ currentPage, total }: Props) {
     <Pagination
       current={currentPage}
       total={total}
-      pageSize={6}
+      pageSize={20}
       onChange={(page) => {
         const params = new URLSearchParams(searchParams.toString());
         params.set("page", String(page));

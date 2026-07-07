@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Movie, Genre } from "@/src/types/movie";
-import MovieCard from "../MovieCard/MovieCard";
+import MovieCard from "../movie-card/MovieCard";
+import { Spin } from "antd";
 
 interface Props {
   genres: Genre[];
@@ -30,7 +31,7 @@ export default function RatedTab({ genres }: Props) {
       });
   }, []);
 
-  const handleRefresh = async () => {
+  /* const handleRefresh = async () => {
     const guestSessionId = localStorage.getItem("guestSessionId");
     if (!guestSessionId) return;
 
@@ -45,10 +46,21 @@ export default function RatedTab({ genres }: Props) {
     } catch (error) {
       console.error("Failed to fetch rated movies:", error);
     }
-  };
+  };*/
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "50vh",
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
   }
 
   if (ratedMovies.length === 0) {
@@ -57,8 +69,7 @@ export default function RatedTab({ genres }: Props) {
 
   return (
     <>
-      <button onClick={handleRefresh}>Refresh</button>
-      <div className="movie-grid">
+      <div className="movie-grid" style={{ marginTop: "10px" }}>
         {ratedMovies.map((movie) => (
           <MovieCard key={movie.id} movie={movie} genres={genres} />
         ))}

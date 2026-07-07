@@ -1,13 +1,12 @@
-"use client";
-
 import { useEffect } from "react";
 import { createGuestSession } from "@/src/lib/api";
 
-export default function GuestSession() {
+export const useGuestSession = () => {
   useEffect(() => {
     const initSession = async () => {
       const existing = localStorage.getItem("guestSessionId");
-      if (existing) return;
+      const expiresAt = localStorage.getItem("guestSessionExpires");
+      if (existing && expiresAt && new Date() < new Date(expiresAt)) return;
 
       try {
         const res = await createGuestSession();
@@ -23,6 +22,7 @@ export default function GuestSession() {
           return;
         }
         localStorage.setItem("guestSessionId", data.guest_session_id);
+        localStorage.setItem("guestSessionExpires", data.expires_at);
       } catch (error) {
         console.error("Failed to create guest session:", error);
       }
@@ -30,4 +30,4 @@ export default function GuestSession() {
     initSession();
   }, []);
   return null;
-}
+};

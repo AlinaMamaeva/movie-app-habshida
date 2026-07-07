@@ -1,24 +1,33 @@
 "use client";
 import { format } from "date-fns";
-
-import { Movie, Genre } from "@/src/types/movie";
+import { Movie } from "@/src/types/movie";
 import { Card, Tag, Rate } from "antd";
 import Image from "next/image";
 import styles from "./MovieCard.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { truncate } from "@/src/lib/truncate";
+import { useGenres } from "@/src/context/GenreContext";
 
 interface Props {
   movie: Movie;
-  genres: Genre[];
 }
-const MovieCard = ({ movie, genres }: Props) => {
+const MovieCard = ({ movie }: Props) => {
+  const genres = useGenres();
   const movieGenres = genres.filter((g) => movie.genre_ids.includes(g.id));
   const imageUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : "/no-image.png";
-  const [expanded, setExpanded] = useState(false);
-  const [userRating, setUserRating] = useState(0);
+
+  const storageKey = `rating_${movie.id}`;
+
+  const [userRating, setUserRating] = useState(movie.rating ?? 0);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      setTimeout(() => setUserRating(Number(saved)), 0);
+    }
+  }, [storageKey]);
 
   const getRatingColor = (rating: number): string => {
     if (rating <= 3) return "#E90000";
@@ -29,6 +38,8 @@ const MovieCard = ({ movie, genres }: Props) => {
 
   const rateMovie = async (movieId: number, rating: number) => {
     const guestSessionId = localStorage.getItem("guestSessionId");
+    setUserRating(rating);
+    localStorage.setItem(storageKey, String(rating));
 
     console.log("GS", guestSessionId);
     console.log("API KEY", process.env.NEXT_PUBLIC_TMDB_API_KEY);
@@ -53,7 +64,7 @@ const MovieCard = ({ movie, genres }: Props) => {
       }
 
       const data = await res.json();
-      console.log("aswer TMDB", data);
+      console.log("answer TMDB", data);
 
       setUserRating(rating);
     } catch (error) {
@@ -104,13 +115,9 @@ const MovieCard = ({ movie, genres }: Props) => {
               </div>
             </div>
 
-            <div className={styles.star}>
-              <p
-                className={styles.mainText}
-                onClick={() => setExpanded((p) => !p)}
-                style={{ cursor: "pointer" }}
-              >
-                {expanded ? movie.overview : truncate(movie.overview, 150)}
+            <div className={styles.footer}>
+              <p className={styles.mainText} style={{ cursor: "pointer" }}>
+                {truncate(movie.overview, 150)}
               </p>
 
               <Rate
