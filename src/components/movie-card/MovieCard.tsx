@@ -13,7 +13,7 @@ interface Props {
 }
 const MovieCard = ({ movie }: Props) => {
   const genres = useGenres();
-  const movieGenres = genres.filter((g) => movie.genre_ids.includes(g.id));
+  const movieGenres = genres.filter((g) => movie.genre_ids?.includes(g.id));
   const imageUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : "/no-image.png";
@@ -32,7 +32,7 @@ const MovieCard = ({ movie }: Props) => {
   const getRatingColor = (rating: number): string => {
     if (rating <= 3) return "#E90000";
     if (rating <= 5) return "#E97E00";
-    if (rating <= 7) return " #E9D100";
+    if (rating <= 7) return "#E9D100";
     return "#66E900";
   };
 
@@ -40,9 +40,6 @@ const MovieCard = ({ movie }: Props) => {
     const guestSessionId = localStorage.getItem("guestSessionId");
     setUserRating(rating);
     localStorage.setItem(storageKey, String(rating));
-
-    console.log("GS", guestSessionId);
-    console.log("API KEY", process.env.NEXT_PUBLIC_TMDB_API_KEY);
 
     if (!guestSessionId) {
       console.error("No session");
@@ -61,12 +58,8 @@ const MovieCard = ({ movie }: Props) => {
 
       if (!res.ok) {
         console.error(`Failed to rate movie: ${res.status}`);
+        return;
       }
-
-      const data = await res.json();
-      console.log("answer TMDB", data);
-
-      setUserRating(rating);
     } catch (error) {
       console.error("Fetch err", error);
     }

@@ -1,9 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Movie } from "@/src/types/movie";
 import MovieCard from "./movie-card/MovieCard";
-import { Tabs, Alert, Spin } from "antd";
-import PaginationClient from "./PaginationClient";
+import { Tabs, Alert, Spin, Pagination } from "antd";
 import SearchClient from "./SearchClient";
 import RatedTab from "./rated-tab/RatedTab";
 import { useOnline } from "../hooks/useOnline";
@@ -24,8 +24,18 @@ export default function TabsClient({
   query,
 }: Props) {
   const [refreshKey, setRefreshKey] = useState(0);
-  const [tabLoading, setTabLoading] = useState(false);
   const isOnline = useOnline();
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(newPage));
+    startTransition(() => {
+      router.push(`?${params.toString()}`, { scroll: false });
+    });
+  };
 
   return (
     <Tabs
@@ -33,9 +43,6 @@ export default function TabsClient({
       onChange={(key) => {
         if (key === "rated") {
           setRefreshKey((k) => k + 1);
-        } else {
-          setTabLoading(true);
-          setTimeout(() => setTabLoading(false), 500);
         }
       }}
       items={[
@@ -54,13 +61,13 @@ export default function TabsClient({
                 />
               ) : (
                 <>
-                  {tabLoading ? (
+                  {isPending ? (
                     <div
                       style={{
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        padding: "50px",
+                        padding: "80px 0",
                       }}
                     >
                       <Spin size="large" />
@@ -74,6 +81,7 @@ export default function TabsClient({
                           showIcon
                         />
                       )}
+
                       {!fetchError && movies.length > 0 && (
                         <div className="movie-grid">
                           {movies.map((movie) => (
@@ -83,9 +91,15 @@ export default function TabsClient({
                       )}
                     </>
                   )}
-                  {!tabLoading && (
-                    <PaginationClient currentPage={page} total={total} />
-                  )}
+                  <Pagination
+                    current={page}
+                    total={total}
+                    pageSize={20}
+                    onChange={handlePageChange}
+                    showSizeChanger={false}
+                    disabled={isPending}
+                    className="pagination"
+                  />
                 </>
               )}
             </>

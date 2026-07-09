@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const guestSessionId = req.nextUrl.searchParams.get("guestSessionId");
+  const page = req.nextUrl.searchParams.get("page") || "1";
 
   if (!guestSessionId) {
     return NextResponse.json({ results: [] });
@@ -9,7 +10,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const res = await fetch(
-      `${process.env.TMDB_BASE_URL}/guest_session/${guestSessionId}/rated/movies?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`,
+      `${process.env.TMDB_BASE_URL}/guest_session/${guestSessionId}/rated/movies?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&page=${page}`,
     );
 
     if (!res.ok) {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "antd/dist/reset.css";
+import Provider from "./providers";
 
 export const metadata: Metadata = {
   title: "Movie Search App",
@@ -14,7 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Provider>{children}</Provider>
+      </body>
     </html>
   );
 }
